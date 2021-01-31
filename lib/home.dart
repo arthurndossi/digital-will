@@ -176,7 +176,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           return false;
         } else {
           if (_lastQuitTime == null || DateTime.now().difference(_lastQuitTime).inSeconds > 1) {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Press again back button to exit')));
+            Scaffold.of(context).showSnackBar(SnackBar(content: Text('Press again back button to exit')));
             _lastQuitTime = DateTime.now();
             return false;
           } else {

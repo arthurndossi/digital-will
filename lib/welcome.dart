@@ -54,7 +54,7 @@ class _WelcomeState extends State<Welcome> {
                             'Welcome to DIBU',
                             textAlign: TextAlign.justify,
                             style: TextStyle(
-                              fontSize: 36,
+                              fontSize: 30,
                               decoration: TextDecoration.underline,
                               fontWeight: FontWeight.bold,
                             ),
