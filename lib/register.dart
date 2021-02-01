@@ -161,7 +161,7 @@ class _RegisterState extends State<Register> {
                                 ElevatedButton(
                                   onPressed: () {
                                     if (_formKey.currentState.validate()) {
-                                      Scaffold.of(context).showSnackBar(SnackBar(content: Text('Processing Data')));
+                                      ScaffoldMessanger.of(context).showSnackBar(SnackBar(content: Text('Processing Data')));
                                     }
                                   },
                                   child: Text(
