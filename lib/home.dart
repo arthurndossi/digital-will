@@ -1,26 +1,26 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:dibu/client_profile.dart';
+import 'package:flutter/services.dart';
 
 import 'add_account.dart';
 import 'add_beneficiary.dart';
 import 'beneficiaries.dart';
+import 'commons.dart';
 import 'constants.dart';
 import 'home_page.dart';
+import 'models/keys.dart';
+import 'notifications.dart';
+import 'providers/default_bar.dart';
+import 'subscription.dart';
 import 'widget/circular_button.dart';
 
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 class Home extends StatefulWidget {
-  Home({Key key, this.title}) : super(key: key);
+  final String uid;
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+  const Home({required this.uid});
 
   @override
   _HomeState createState() => _HomeState();
@@ -28,112 +28,14 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
-  GlobalKey<NavigatorState> _key = GlobalKey();
+  late AnimationController animationController;
+  late Animation degOneTransAnim, degTwoTransAnim;
+  late Animation fabAnimation, rotationAnimation;
 
-  String _currentPage;
-
-  DateTime _lastQuitTime;
-
-  AnimationController animationController;
-  Animation degOneTransAnim, degTwoTransAnim;
-  Animation fabAnimation, rotationAnimation;
-
-  AppBar _defaultBar;
-  AppBar _selectBar;
-  AppBar _appBar;
-
-  // Beneficiary _beneficiary;
-
-  _setBar(currentBar) {
-    setState(() {
-      if (currentBar == 'AppBar')
-        _appBar = _defaultBar;
-      else
-        _appBar = _selectBar;
-    });
-  }
-
-  _setPage(page) {
-    setState(() {
-      _currentPage = page;
-    });
-  }
-
-  // _setBeneficiary(String page, Beneficiary beneficiary) {
-  //   setState(() {
-  //     _currentPage = page;
-  //     _beneficiary = beneficiary;
-  //   });
-  // }
+  late DateTime _lastQuitTime;
 
   @override
   void initState() {
-    // TODO: implement initState
-    _currentPage = 'HomePage';
-    _defaultBar = AppBar(
-      title: Text(
-        'DIBU',
-        style: TextStyle(
-          color: Colors.white,
-        ),
-      ),
-      centerTitle: true,
-      actions: [
-        IconButton(
-          icon: Icon(Icons.people_alt_rounded, color: Colors.white,),
-          onPressed: () {
-            setState(() {
-              _currentPage = 'BeneficiariesPage';
-            });
-          },
-        ),
-        PopupMenuButton(
-          icon: Icon(Icons.more_vert, color: Colors.white,),
-          onSelected: (_) {},
-          itemBuilder: (context) {
-            return Constants.choices.map((String choice) {
-              return PopupMenuItem(child: Text(choice), value: choice,);
-            }).toList();
-          }
-        )
-      ],
-      backgroundColor: Color(0xFF62D1EA),
-      automaticallyImplyLeading: false,
-    );
-    _selectBar = AppBar(
-      leading: IconButton(
-        icon: Icon(Icons.arrow_back, color: Colors.white,),
-        onPressed: () {
-          _setBar('AppBar');
-        },
-      ),
-      title: Text(
-        '1',
-        style: TextStyle(
-          color: Colors.white,
-        ),
-      ),
-      centerTitle: true,
-      actions: [
-        IconButton(
-          icon: Icon(Icons.delete, color: Colors.white,),
-          onPressed: () {
-
-          },
-        ),
-        PopupMenuButton(
-            icon: Icon(Icons.more_vert, color: Colors.white,),
-            onSelected: (_) {},
-            itemBuilder: (context) {
-              return Constants.choices.map((String choice) {
-                return PopupMenuItem(child: Text(choice), value: choice,);
-              }).toList();
-            }
-        )
-      ],
-      backgroundColor: Color(0xFF3B7D8C),
-    );
-    _appBar = _defaultBar;
     animationController = AnimationController(vsync: this, duration: Duration(milliseconds: 250));
     degOneTransAnim = TweenSequence([
       TweenSequenceItem(tween: Tween<double>(begin: 0.0, end: 1.2), weight: 75.0),
@@ -145,10 +47,10 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     ]).animate(animationController);
     // degOneTransAnim = Tween(begin: 0.0, end: 1.0).animate(animationController);
     fabAnimation = Tween(begin: 180.0, end: 45.0).animate(
-        CurvedAnimation(parent: animationController, curve: Curves.easeOut)
+      CurvedAnimation(parent: animationController, curve: Curves.easeOut)
     );
     rotationAnimation = Tween(begin: 180.0, end: 0.0).animate(
-        CurvedAnimation(parent: animationController, curve: Curves.easeOut)
+      CurvedAnimation(parent: animationController, curve: Curves.easeOut)
     );
 
     super.initState();
@@ -160,140 +62,241 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-
     Size size = MediaQuery.of(context).size;
 
-    return WillPopScope(
-      onWillPop: () async {
-        if (_key.currentState.canPop()) {
-          _key.currentState.pop();
-          return false;
-        } else {
-          if (_lastQuitTime == null || DateTime.now().difference(_lastQuitTime).inSeconds > 1) {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Press again back button to exit')));
-            _lastQuitTime = DateTime.now();
-            return false;
-          } else {
-            Navigator.of(context, rootNavigator: true).pop(true);
-            return true;
-          }
-        }
-      },
-      child: Scaffold(
-        appBar: _appBar,
-        body: Container(
-          width: size.width,
-          height: size.height,
-          child: Stack(
-            children: <Widget>[
-              Column(
-                children: [
-                  Expanded(
-                      child: Navigator(
-                        key: _key,
-                        onGenerateRoute: (RouteSettings settings) =>
-                            MaterialPageRoute(builder: (context) {
-                              if (_currentPage == 'HomePage')
-                                return HomePage(
-                                  setBar: _setBar,
-                                  appBar: _appBar == _defaultBar ? 'AppBar' : 'SelectBar'
-                                );
-                              else if (_currentPage == 'AddAccountPage')
-                                return AddAccount(page: _setPage);
-                              else if (_currentPage == 'AddBeneficiaryPage')
-                                return AddBeneficiary(page: _setPage);
-                              else if (_currentPage == 'BeneficiariesPage')
-                                return Beneficiaries(page: _setPage,);
-                              // else if (_currentPage == 'BeneficiaryPage')
-                              //   return BeneficiaryProfile(
-                              //     beneficiary: _beneficiary,
-                              //   );
-                              else
-                                return HomePage(
-                                    setBar: _setBar,
-                                    appBar: _appBar == _defaultBar ? 'AppBar' : 'SelectBar'
-                                );
-                            }),
-                    )
+    return ChangeNotifierProvider(
+      create: (context) => DefaultBar(),
+      child: Consumer<DefaultBar>(
+        builder: (context, defaultBar, child) {
+          return WillPopScope(
+            onWillPop: () async {
+              if (NavKey.innerNavKey.currentState!.canPop()) {
+                NavKey.innerNavKey.currentState!.maybePop();
+                return false;
+              } else {
+                if (DateTime.now().difference(_lastQuitTime).inSeconds > 1) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Press again back button to exit')));
+                  _lastQuitTime = DateTime.now();
+                  return false;
+                } else {
+                  SystemNavigator.pop(animated: true);
+                  // Navigator.of(context, rootNavigator: true).maybePop();
+                  return true;
+                }
+              }
+            },
+            child: Scaffold(
+              appBar: defaultBar.getCurrentBar == 'AppBar' ? AppBar(
+                title: Text(
+                  'Digital Will',
+                  style: TextStyle(
+                    color: Colors.white,
                   ),
-                ],
-              ),
-              Positioned(
-                right: 20,
-                bottom: 30,
-                child: Stack(
-                  alignment: Alignment.bottomRight,
-                  children: [
-                    IgnorePointer(
-                      child: Container(
-                        color: Colors.transparent,
-                        height: 150.0,
-                        width: 150.0,
-                      ),
-                    ),
-                    Transform.translate(
-                      offset: Offset.fromDirection(getRadiansFromDegree(180), degOneTransAnim.value * 100),
-                      child: Transform(
-                        transform: Matrix4.rotationZ(getRadiansFromDegree(rotationAnimation.value))..scale(degOneTransAnim.value),
-                        alignment: Alignment.center,
-                        child: CircularButton(
-                            color: Color(0xFF62D1EA),
-                            width: 50,
-                            height: 50,
-                            icon: Icon(Icons.account_circle, color: Colors.white,),
-                            onClick: () => {
-                              setState(() {
-                                _currentPage = 'AddAccountPage';
-                              }),
-                              toggleFab()
-                            }
-                        ),
-                      ),
-                    ),
-                    Transform.translate(
-                      offset: Offset.fromDirection(getRadiansFromDegree(225), degTwoTransAnim.value * 100),
-                      child: Transform(
-                        transform: Matrix4.rotationZ(getRadiansFromDegree(rotationAnimation.value))..scale(degTwoTransAnim.value),
-                        alignment: Alignment.center,
-                        child: CircularButton(
-                            color: Color(0xFF62D1EA),
-                            width: 50,
-                            height: 50,
-                            icon: Icon(Icons.person_add, color: Colors.white,),
-                            onClick: () => {
-                              setState(() {
-                                _currentPage = 'AddBeneficiaryPage';
-                              }),
-                              toggleFab()
-                            }
-                        ),
-                      ),
-                    ),
-                    Transform(
-                      transform: Matrix4.rotationZ(getRadiansFromDegree(fabAnimation.value)),
-                      alignment: Alignment.center,
-                      child: CircularButton(
-                        color: Color(0xFF62D1EA),
-                        width: 60,
-                        height: 60,
-                        icon: Icon(Icons.add, color: Colors.white,),
-                        onClick: () => {
-                          toggleFab()
+                ),
+                actions: [
+                  IconButton(
+                    icon: Icon(Icons.people_alt_rounded, color: Colors.white,),
+                    onPressed: () {
+                      NavKey.innerNavKey.currentState!.push(
+                          MaterialPageRoute(builder: (context) =>
+                              Beneficiaries(uid: widget.uid))
+                      );
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.notifications, color: Colors.white,),
+                    onPressed: () {
+                      NavKey.innerNavKey.currentState!.push(
+                          MaterialPageRoute(builder: (context) =>
+                              Notifications(uid: widget.uid))
+                      );
+                    },
+                  ),
+                  PopupMenuButton(
+                      icon: Icon(Icons.more_vert, color: Colors.white,),
+                      onSelected: (item) {
+                        if (item == 'Logout') {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) => AlertDialog(
+                              title: Text("Logging out"),
+                              content: Text("Are you sure you want to log out?"),
+                              actions: [
+                                FlatButton(
+                                  child: Text("OK"),
+                                  onPressed: () { Commons().logout(context); },
+                                ),
+                                FlatButton(
+                                  child: Text("Cancel"),
+                                  onPressed: () { Navigator.pop(context); },
+                                ),
+                              ],
+                            )
+                          );
+                        } else if (item == "My Profile") {
+                          NavKey.innerNavKey.currentState!.push(
+                              MaterialPageRoute(builder: (context) =>
+                                  ClientProfile(uid: widget.uid))
+                          );
+                        } else if (item == "Subscription") {
+                          NavKey.innerNavKey.currentState!.push(
+                              MaterialPageRoute(builder: (context) =>
+                                  Subscription(uid: widget.uid))
+                          );
                         }
-                      ),
+                      },
+                      itemBuilder: (context) {
+                        return Constants.choices.map((String choice) {
+                          return PopupMenuItem(child: Text(choice), value: choice,);
+                        }).toList();
+                      }
+                  )
+                ],
+                backgroundColor: Color(0xFF62D1EA),
+                automaticallyImplyLeading: false,
+              ) : AppBar(
+                leading: IconButton(
+                  icon: Icon(Icons.arrow_back, color: Colors.white,),
+                  onPressed: () {
+                    defaultBar.setCurrentBar('AppBar');
+                    defaultBar.clearSelected();
+                  },
+                ),
+                title: Text(
+                  defaultBar.getCounter,
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
+                actions: [
+                  IconButton(
+                    icon: Icon(Icons.delete, color: Colors.white,),
+                    onPressed: () {
+
+                    },
+                  ),
+                  PopupMenuButton(
+                      icon: Icon(Icons.more_vert, color: Colors.white,),
+                      onSelected: (_) {},
+                      itemBuilder: (context) {
+                        return Constants.choices.map((String choice) {
+                          return PopupMenuItem(child: Text(choice), value: choice,);
+                        }).toList();
+                      }
+                  )
+                ],
+                backgroundColor: Color(0xFF3B7D8C),
+              ),
+              body: Container(
+                width: size.width,
+                height: size.height,
+                child: Stack(
+                  children: <Widget>[
+                    Navigator(
+                      key: NavKey.innerNavKey,
+                      initialRoute: 'screen/home',
+                      onGenerateRoute: (RouteSettings settings) {
+                        WidgetBuilder builder;
+                        switch (settings.name) {
+                          case 'screen/home':
+                            builder = (BuildContext _) => HomePage(uid: widget.uid);
+                            break;
+                          case 'screen/add/account':
+                            builder = (BuildContext _) =>
+                                AddAccount(
+                                    isInstalled: false, uid: widget.uid
+                                );
+                            break;
+                          case 'screen/add/beneficiary':
+                            builder = (BuildContext _) => AddBeneficiary(uid: widget.uid);
+                            break;
+                          case 'screen/beneficiaries':
+                            builder = (BuildContext _) => Beneficiaries(uid: widget.uid);
+                            break;
+                          // case 'screen/account':
+                          //   builder = (BuildContext _) => AppAccount();
+                          //   break;
+                          default:
+                            throw Exception('Invalid route: ${settings.name}');
+                        }
+                        return MaterialPageRoute(builder: builder, settings: settings);
+                      },
+                    ),
+                    Positioned(
+                        right: 20,
+                        bottom: 30,
+                        child: Stack(
+                          alignment: Alignment.bottomRight,
+                          children: [
+                            IgnorePointer(
+                              child: Container(
+                                color: Colors.transparent,
+                                height: 150.0,
+                                width: 150.0,
+                              ),
+                            ),
+                            Transform.translate(
+                              offset: Offset.fromDirection(getRadiansFromDegree(180), degOneTransAnim.value * 100),
+                              child: Transform(
+                                transform: Matrix4.rotationZ(getRadiansFromDegree(rotationAnimation.value))..scale(degOneTransAnim.value),
+                                alignment: Alignment.center,
+                                child: CircularButton(
+                                    color: Color(0xFF62D1EA),
+                                    width: 50,
+                                    height: 50,
+                                    icon: Icon(Icons.account_circle, color: Colors.white,),
+                                    onClick: () => {
+                                      toggleFab(),
+                                      NavKey.innerNavKey.currentState!.push(
+                                          MaterialPageRoute(builder: (context) =>
+                                              AddAccount(isInstalled: false, uid: widget.uid))
+                                      )
+                                    }
+                                ),
+                              ),
+                            ),
+                            Transform.translate(
+                              offset: Offset.fromDirection(getRadiansFromDegree(225), degTwoTransAnim.value * 100),
+                              child: Transform(
+                                transform: Matrix4.rotationZ(getRadiansFromDegree(rotationAnimation.value))..scale(degTwoTransAnim.value),
+                                alignment: Alignment.center,
+                                child: CircularButton(
+                                    color: Color(0xFF62D1EA),
+                                    width: 50,
+                                    height: 50,
+                                    icon: Icon(Icons.person_add, color: Colors.white,),
+                                    onClick: () => {
+                                      toggleFab(),
+                                      NavKey.innerNavKey.currentState!.push(
+                                          MaterialPageRoute(builder: (context) =>
+                                              AddBeneficiary(uid: widget.uid))
+                                      )
+                                    }
+                                ),
+                              ),
+                            ),
+                            Transform(
+                              transform: Matrix4.rotationZ(getRadiansFromDegree(fabAnimation.value)),
+                              alignment: Alignment.center,
+                              child: CircularButton(
+                                  color: Color(0xFF62D1EA),
+                                  width: 60,
+                                  height: 60,
+                                  icon: Icon(Icons.add, color: Colors.white,),
+                                  onClick: () => {
+                                    toggleFab()
+                                  }
+                              ),
+                            )
+                          ],
+                        )
                     )
                   ],
-                )
-              )
-            ],
-          ),
-        ),
+                ),
+              ),
+            ),
+          );
+        }
       ),
     );
   }

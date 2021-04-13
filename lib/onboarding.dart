@@ -17,19 +17,12 @@ class Onboarding extends StatefulWidget {
 
 class _OnboardingState extends State<Onboarding> {
 
-  PageController _pageController;
+  PageController _pageController = PageController();
 
   int currentPageValue = 0;
 
   static const _kDuration = const Duration(milliseconds: 300);
   static const _kCurve = Curves.ease;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _pageController = PageController();
-  }
 
   @override
   void dispose() {
@@ -144,7 +137,8 @@ class _OnboardingState extends State<Onboarding> {
 class Indicator extends StatelessWidget {
 
   final int positionIndex, currentIndex;
-  const Indicator({this.currentIndex, this.positionIndex});
+
+  const Indicator({required this.currentIndex, required this.positionIndex});
 
   @override
   Widget build(BuildContext context) {

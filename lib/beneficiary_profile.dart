@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'app_account.dart';
-import 'models/account.dart';
 import 'models/app.dart';
 import 'models/beneficiary.dart';
 
@@ -9,8 +8,7 @@ class BeneficiaryProfile extends StatefulWidget {
   final Beneficiary beneficiary;
   final page;
 
-  // BeneficiaryProfile({Key key, @required this.beneficiary, this.page}) : super(key: key);
-  const BeneficiaryProfile({this.beneficiary, this.page});
+  const BeneficiaryProfile({required this.beneficiary, this.page});
 
   @override
   _BeneficiaryProfileState createState() => _BeneficiaryProfileState();
@@ -19,98 +17,94 @@ class BeneficiaryProfile extends StatefulWidget {
 class _BeneficiaryProfileState extends State<BeneficiaryProfile> {
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Account>>(
+    return FutureBuilder<List<App>>(
         future: Future(() => [
-          Account(
-            app: App('Facebook', CircleAvatar(
-              radius: 25.0,
-              backgroundColor: Colors.transparent,
-              child: Image.asset('assets/images/png/fb-icon.png', width: 50.0, height: 50.0,),
-            ), 'Social'),
-            beneficiary: widget.beneficiary.fullName,
-            owner: 'Arthur David',
+          App.account(
+            name: 'Facebook',
+            icon: 'assets/images/png/fb-icon.png',
+            category: 'Social',
             accessRight: 'Full Access',
             status: '',
             description: '',
+            owner: 'Arthur David',
+            beneficiary: {'uid': '', 'name': widget.beneficiary.name!},
           ),
-          Account(
-            app: App('Instagram', CircleAvatar(
-              radius: 25.0,
-              backgroundColor: Colors.transparent,
-              child: Image.asset('assets/images/png/instagram-icon.png', width: 50.0, height: 50.0,),
-            ), 'Social'),
-            beneficiary: widget.beneficiary.fullName,
-            owner: 'Arthur David',
+          App.account(
+            name: 'Instagram',
+            icon: 'assets/images/png/instagram-icon.png',
+            category: 'Social',
             accessRight: 'Full Access',
             status: '',
             description: '',
+            owner: 'Arthur David',
+            beneficiary: {'uid': '', 'name': widget.beneficiary.name!},
           ),
-          Account(
-            app: App('TikTok', CircleAvatar(
-              radius: 25.0,
-              backgroundColor: Colors.transparent,
-              child: Image.asset('assets/images/png/tiktok-icon.png', width: 50.0, height: 50.0,),
-            ), 'Social'),
-            beneficiary: widget.beneficiary.fullName,
-            owner: 'Arthur David',
+          App.account(
+            name: 'TikTok',
+            icon: 'assets/images/png/tiktok-icon.png',
+            category: 'Social',
             accessRight: 'Full Access',
             status: '',
             description: '',
+            owner: 'Arthur David',
+            beneficiary: {'uid': '', 'name': widget.beneficiary.name!},
           ),
-          Account(
-            app: App('Snapchat', CircleAvatar(
-              radius: 25.0,
-              backgroundColor: Colors.transparent,
-              child: Image.asset('assets/images/png/snapchat-icon.png', width: 50.0, height: 50.0,),
-            ), 'Social'),
-            beneficiary: widget.beneficiary.fullName,
-            owner: 'Arthur David',
+          App.account(
+            name: 'Snapchat',
+            icon: 'assets/images/png/snapchat-icon.png',
+            category: 'Social',
             accessRight: 'Full Access',
             status: '',
             description: '',
+            owner: 'Arthur David',
+            beneficiary: {'uid': '', 'name': widget.beneficiary.name!},
           ),
-          Account(
-            app: App('Tinder', CircleAvatar(
-              radius: 25.0,
-              backgroundColor: Colors.transparent,
-              child: Image.asset('assets/images/png/tinder-icon.png', width: 50.0, height: 50.0,),
-            ), 'Social'),
-            beneficiary: widget.beneficiary.fullName,
-            owner: 'Arthur David',
+          App.account(
+            name: 'Tinder',
+            icon: 'assets/images/png/tinder-icon.png',
+            category: 'Social',
             accessRight: 'Full Access',
             status: '',
             description: '',
+            owner: 'Arthur David',
+            beneficiary: {'uid': '', 'name': widget.beneficiary.name!},
           ),
-          Account(
-            app: App('Twitter', CircleAvatar(
-              radius: 25.0,
-              backgroundColor: Colors.transparent,
-              child: Image.asset('assets/images/png/twitter-icon.png', width: 50.0, height: 50.0,),
-            ), 'Social'),
-            beneficiary: widget.beneficiary.fullName,
-            owner: 'Arthur David',
+          App.account(
+            name: 'Tinder',
+            icon: 'assets/images/png/twitter-icon.png',
+            category: 'Social',
             accessRight: 'Full Access',
             status: '',
             description: '',
+            owner: 'Arthur David',
+            beneficiary: {'uid': '', 'name': widget.beneficiary.name!},
           ),
-          Account(
-            app: App('Linked In', CircleAvatar(
-              radius: 25.0,
-              backgroundColor: Colors.transparent,
-              child: Image.asset('assets/images/png/linked_in-icon.png', width: 50.0, height: 50.0,),
-            ), 'Social'),
-            beneficiary: widget.beneficiary.fullName,
-            owner: 'Arthur David',
+          App.account(
+            name: 'Twitter',
+            icon: 'assets/images/png/twitter-icon.png',
+            category: 'Social',
             accessRight: 'Full Access',
             status: '',
             description: '',
+            owner: 'Arthur David',
+            beneficiary: {'uid': '', 'name': widget.beneficiary.name!},
+          ),
+          App.account(
+            name: 'Linked In',
+            icon: 'assets/images/png/linked_in-icon.png',
+            category: 'Social',
+            accessRight: 'Full Access',
+            status: '',
+            description: '',
+            owner: 'Arthur David',
+            beneficiary: {'uid': '', 'name': widget.beneficiary.name!},
           ),
         ]),
         builder: (context, data) {
           if (data.data == null) {
             return const Center(child: CircularProgressIndicator(),);
           } else {
-            List<Account> accounts = data.data;
+            List<App> accounts = data.data!;
             return Container(
               child: Column(
                 children: [
@@ -119,10 +113,10 @@ class _BeneficiaryProfileState extends State<BeneficiaryProfile> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: widget.beneficiary.dp.isNotEmpty ? CircleAvatar(
+                        child: widget.beneficiary.dp!.isNotEmpty ? CircleAvatar(
                           radius: 60.0,
                           backgroundColor: Colors.transparent,
-                          backgroundImage: NetworkImage(widget.beneficiary.dp),
+                          backgroundImage: NetworkImage(widget.beneficiary.dp!),
                         ): null,
                       )
                     ],
@@ -130,20 +124,20 @@ class _BeneficiaryProfileState extends State<BeneficiaryProfile> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(widget.beneficiary.fullName, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),)
+                      Text(widget.beneficiary.name!, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),)
                     ],
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(widget.beneficiary.email,)
+                      Text(widget.beneficiary.email!,)
                     ],
                   ),
                   widget.beneficiary.phoneNumber == null ? Container() :
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(widget.beneficiary.phoneNumber,)
+                        Text(widget.beneficiary.phoneNumber!)
                       ],
                     ),
                   Row(
@@ -151,7 +145,7 @@ class _BeneficiaryProfileState extends State<BeneficiaryProfile> {
                       Padding(
                         padding: const EdgeInsets.fromLTRB(8.0, 16.0, 0, 8.0),
                         child: Text(
-                          'ACCOUNTS(${widget.beneficiary.apps.length})',
+                          'ACCOUNTS(${widget.beneficiary.apps!.length})',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -166,23 +160,24 @@ class _BeneficiaryProfileState extends State<BeneficiaryProfile> {
                         child: ListView.builder(
                           shrinkWrap: true,
                           itemBuilder: (context, position) {
-                            Account account = accounts[position];
+                            App account = accounts[position];
                             return Card(
                               elevation: 8.0,
                               child: ListTile(
-                                leading: account.app.icon != null
-                                    ? account.app.icon
-                                    : null,
-                                // onTap: () => widget.page('AccountPage'),
+                                leading: account.icon != null ? CircleAvatar(
+                                  radius: 25.0,
+                                  backgroundColor: Colors.transparent,
+                                  child: Image.asset(account.icon!, width: 50.0, height: 50.0,),
+                                ) : null,
                                 onTap: () {
                                   Navigator.push(context, MaterialPageRoute(builder: (context) {
-                                    return AppAccount(account: account);
+                                    return AppAccount(app: account);
                                   }));
                                 },
                                 onLongPress: () {
                                   // widget.setBar('SelectBar');
                                 },
-                                title: Text('${account.app.name}'),
+                                title: Text('${account.name}'),
                                 subtitle: Text(
                                   '${account.owner}', style: TextStyle(fontSize: 12),),
                                 trailing: IconButton(
@@ -192,7 +187,7 @@ class _BeneficiaryProfileState extends State<BeneficiaryProfile> {
                                   ),
                                   onPressed: () {
                                     Navigator.push(context, MaterialPageRoute(builder: (context) {
-                                      return AppAccount(account: account);
+                                      return AppAccount(app: account);
                                     }));
                                   },
                                 ),

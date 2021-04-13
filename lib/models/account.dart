@@ -1,12 +1,12 @@
 import 'app.dart';
 
 class Account {
-  App app;
-  String beneficiary;
-  String owner;
-  String accessRight;
-  String status;
-  String description;
+  App? app;
+  String? beneficiary;
+  String? owner;
+  String? accessRight;
+  String? status;
+  String? description;
 
   Account({this.app, this.status, this.accessRight, this.owner, this.beneficiary,
       this.description});

@@ -5,7 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'models/intro.dart';
 
 class IntroWidget extends StatelessWidget {
-  Intro _intro;
+  late Intro _intro;
 
   IntroWidget(Intro intro) {
     _intro = intro;

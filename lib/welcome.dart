@@ -19,9 +19,11 @@ class _WelcomeState extends State<Welcome> {
       height: 150,
       alignment: Alignment.center,
       child: Text(
-        'DIBU',
+        'Digital Will',
         textAlign: TextAlign.center,
         style: TextStyle(
+          fontSize: 28,
+          fontWeight: FontWeight.w900,
           color: Colors.white,
           decoration: TextDecoration.none,
         ),
@@ -51,7 +53,7 @@ class _WelcomeState extends State<Welcome> {
                         Padding(
                           padding: const EdgeInsets.fromLTRB(32.0, 0.0, 32.0, 16.0),
                           child: Text(
-                            'Welcome to DIBU',
+                            'Welcome to Digital Will',
                             textAlign: TextAlign.justify,
                             style: TextStyle(
                               fontSize: 30,

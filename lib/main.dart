@@ -1,37 +1,53 @@
+import 'package:dibu/commons.dart';
+import 'package:dibu/home.dart';
+import 'package:dibu/login.dart';
 import 'package:dibu/onboarding.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'DIBU',
+      title: 'Digital Will',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
         primarySwatch: createMaterialColor(Color(0xFF62D1EA)),
       ),
-      // home: MyHomePage(title: 'DIBU'),
-      home: Onboarding(),
+      home: FutureBuilder(
+          future: Future.wait([
+            Commons().checkLoginStatus(),
+            Commons().getUid(),
+          ]),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting)
+              return Center(child: CircularProgressIndicator());
+            else if (snapshot.hasData) {
+              List<String> list = snapshot.data as List<String>;
+              if (list[0] == "logged_out")
+                return Login();
+              else if (list[0] == "logged_in")
+                return Home(uid: list[1]);
+              else
+                return Onboarding();
+            } else {
+                return Onboarding();
+            }
+          }
+      ),
       debugShowCheckedModeBanner: false,
     );
   }
 
   MaterialColor createMaterialColor(Color color) {
     List strengths = <double>[.05];
-    Map swatch = <int, Color>{};
+    Map<int, Color> swatch = <int, Color>{};
     final int r = color.red, g = color.green, b = color.blue;
 
     for (int i = 1; i < 10; i++) {
@@ -41,10 +57,10 @@ class MyApp extends StatelessWidget {
     strengths.forEach((strength) {
       final double ds = 0.5 - strength;
       swatch[(strength * 1000).round()] = Color.fromRGBO(
-          r + ((ds < 0 ? r : (255 - r)) * ds).round(),
-          g + ((ds < 0 ? g : (255 - g)) * ds).round(),
-          b + ((ds < 0 ? b : (255 - b)) * ds).round(),
-          1
+        r + ((ds < 0 ? r : (255 - r)) * ds).round(),
+        g + ((ds < 0 ? g : (255 - g)) * ds).round(),
+        b + ((ds < 0 ? b : (255 - b)) * ds).round(),
+        1
       );
     });
     return MaterialColor(color.value, swatch);

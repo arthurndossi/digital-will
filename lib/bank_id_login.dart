@@ -23,9 +23,11 @@ class _BankIDLoginState extends State<BankIDLogin> {
       height: 150,
       alignment: Alignment.center,
       child: Text(
-        'DIBU',
+        'Digital Will',
         textAlign: TextAlign.center,
         style: TextStyle(
+          fontSize: 28,
+          fontWeight: FontWeight.w900,
           color: Colors.white,
           decoration: TextDecoration.none,
         ),
@@ -86,7 +88,7 @@ class _BankIDLoginState extends State<BankIDLogin> {
                                       prefixIcon: const Icon(Icons.assignment_ind_outlined),
                                     ),
                                     validator: (value) {
-                                      if (value.isEmpty)
+                                      if (value!.isEmpty)
                                         return 'Please enter your username!';
                                       return null;
                                     },

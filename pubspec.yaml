@@ -18,7 +18,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
+  sdk: ">=2.12.0 <3.0.0"
 
 dependencies:
   flutter:
@@ -29,17 +29,31 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
   english_words: ^3.1.5
-  flutter_svg: ^0.19.2+1
+  flutter_svg: ^0.21.0-nullsafety.0
   device_apps: ^1.2.0
   grouped_list: ^3.7.1
   collection: ^1.14.13
+  flutter_secure_storage: ^3.3.5
+  provider: ^4.3.3
+  http: ^0.12.2
 #  shared_preferences: '>= 0.5.12+4 < 2.0.0'
+  # Add the dependency for the Firebase Core Flutter SDK
+  firebase_core: ^0.7.0
+  # Add the dependency for the FlutterFire plugin for Google Analytics
+  firebase_analytics: ^7.0.1
+  # Add the dependency for Firebase Authentication
+  firebase_auth: ^0.20.0+1
+  # Add the dependency for Cloud Firestore
+  cloud_firestore: ^0.16.0
+  flutter_credit_card: 2.0.0
+
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   integration_test:
     sdk: flutter
+  change_app_package_name: ^0.1.2
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -57,6 +71,8 @@ flutter:
      - assets/images/svg/onboarding1.svg
      - assets/images/svg/onboarding2.svg
      - assets/images/svg/onboarding3.svg
+     - assets/images/svg/PayPal.svg
+     - assets/images/svg/credit-card.svg
      - assets/images/png/amazon-icon.png
      - assets/images/png/bitcoin-icon.png
      - assets/images/png/brand_apple_pay-icon.png

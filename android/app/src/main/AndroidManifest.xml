@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.dibu">
+    package="com.dibu.digitalwill">
    <application
-        android:label="dibu"
+        android:label="Digital Will"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
