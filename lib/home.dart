@@ -1,5 +1,13 @@
+import 'dart:convert';
+import 'dart:developer';
+
 import 'package:dibu/client_profile.dart';
+import 'package:dibu/main.dart';
+import 'package:dibu/widget/notification_badge.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:http/http.dart' as http;
 
 import 'add_account.dart';
 import 'add_beneficiary.dart';
@@ -34,6 +42,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   late DateTime _lastQuitTime;
 
+  int _totalNotifications = 0;
+  String? _token = "";
+
   @override
   void initState() {
     animationController = AnimationController(vsync: this, duration: Duration(milliseconds: 250));
@@ -58,12 +69,43 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     animationController.addListener(() {
       setState(() {});
     });
+
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      RemoteNotification? notification = message.notification;
+      AndroidNotification? androidNotification = message.notification?.android;
+      if (notification != null && androidNotification != null) {
+        plugin.show(
+            notification.hashCode,
+            notification.title,
+            notification.body,
+            NotificationDetails(
+              android: AndroidNotificationDetails(
+                channel.id,
+                channel.name,
+                channel.description,
+                icon: 'launch_image'
+              )
+            )
+        );
+      }
+    });
+
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (context) => Notifications(uid: widget.uid))
+      );
+    });
+    // Get current FCM token
+    FirebaseMessaging.instance.getToken()
+        .then((token) => {
+          _token = token,
+          log('FCM Token: $_token')
+        })
+        .catchError((e) {print(e);});
   }
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
-
     return ChangeNotifierProvider(
       create: (context) => DefaultBar(),
       child: Consumer<DefaultBar>(
@@ -86,7 +128,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               }
             },
             child: Scaffold(
-              appBar: defaultBar.getCurrentBar == 'AppBar' ? AppBar(
+              appBar: defaultBar.getCurrentBar == 'AppBar' ?
+              AppBar(
                 title: Text(
                   'Digital Will',
                   style: TextStyle(
@@ -104,7 +147,21 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                     },
                   ),
                   IconButton(
-                    icon: Icon(Icons.notifications, color: Colors.white,),
+                    icon: Stack(
+                      children: [
+                        Icon(Icons.notifications, color: Colors.white,),
+                        Visibility(
+                          visible: _totalNotifications > 0,
+                          child: Positioned(
+                            top: 0,
+                            right: 0,
+                            child: NotificationBadge(
+                              totalNotifications: _totalNotifications,
+                            )
+                          ),
+                        )
+                      ], 
+                    ),
                     onPressed: () {
                       NavKey.innerNavKey.currentState!.push(
                           MaterialPageRoute(builder: (context) =>
@@ -122,11 +179,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                               title: Text("Logging out"),
                               content: Text("Are you sure you want to log out?"),
                               actions: [
-                                FlatButton(
+                                TextButton(
                                   child: Text("OK"),
                                   onPressed: () { Commons().logout(context); },
                                 ),
-                                FlatButton(
+                                TextButton(
                                   child: Text("Cancel"),
                                   onPressed: () { Navigator.pop(context); },
                                 ),
@@ -154,12 +211,14 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                 ],
                 backgroundColor: Color(0xFF62D1EA),
                 automaticallyImplyLeading: false,
-              ) : AppBar(
+              ) :
+              AppBar(
                 leading: IconButton(
                   icon: Icon(Icons.arrow_back, color: Colors.white,),
                   onPressed: () {
                     defaultBar.setCurrentBar('AppBar');
                     defaultBar.clearSelected();
+                    defaultBar.update();
                   },
                 ),
                 title: Text(
@@ -188,8 +247,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                 backgroundColor: Color(0xFF3B7D8C),
               ),
               body: Container(
-                width: size.width,
-                height: size.height,
                 child: Stack(
                   children: <Widget>[
                     Navigator(
@@ -312,5 +369,40 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     } else {
       animationController.forward();
     }
+  }
+
+  Future<void> sendPushMessage() async {
+    if (_token == null) {
+      print('Unable to send FCM message, no token exists.');
+      return;
+    }
+
+    try {
+      await http.post(
+        Uri.https('api.rnfirebase.io', '/messaging/send'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: _constructFCMPayload(_token),
+      );
+      print('FCM request for device sent!');
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  String _constructFCMPayload(String? token) {
+    _totalNotifications++;
+    return jsonEncode({
+      'token': token,
+      'data': {
+        'via': '',
+        'count': '$_totalNotifications'
+      },
+      'notification': {
+        'title': '',
+        'body': 'This notification (#$_totalNotifications) was created through FCM!'
+      }
+    });
   }
 }

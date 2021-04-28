@@ -28,10 +28,13 @@ class _AddAccountState extends State<AddAccount> {
   String? _actionVal;
   Beneficiary? _beneficiaryVal;
 
+  List<String> _categoryList = ['Social', 'Cloud Storage', 'Cryptocurrency',
+    'Streaming'];
   List<String> _accountsList = [];
-  List<String> _socialList = ['Facebook', 'Instagram', 'WhatsApp', 'Likee', 'Linked In',
-    'Snapchat', 'Twitter', 'TikTok', 'Tinder'];
+  List<String> _socialList = ['Facebook', 'Instagram', 'WhatsApp', 'Likee',
+    'Linked In', 'Snapchat', 'Twitter', 'TikTok', 'Tinder', 'Skype'];
   List<String> _storageList = ['Google Drive', 'iCloud', 'Dropbox'];
+  List<String> _streamingList = ['Netflix', 'Spotify', 'Prime Video'];
   List<String> _cryptoCurrencyList = ['Coin base', 'Bitcoin', 'Ethereum'];
   List<String>? _accessRights = [];
   List<Beneficiary>? _beneficiaries;
@@ -49,6 +52,8 @@ class _AddAccountState extends State<AddAccount> {
     _categoryVal = widget.category;
     if (_categoryVal == 'Social')
       _accountsList = _socialList;
+    else if (_categoryVal == 'Streaming')
+      _accountsList = _streamingList;
     else if (_categoryVal == 'Cloud Storage')
       _accountsList = _storageList;
     else if (_categoryVal == 'Cryptocurrency')
@@ -90,7 +95,10 @@ class _AddAccountState extends State<AddAccount> {
                       children: [
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 16.0),
-                          child: Text('ADD ACCOUNT', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
+                          child: Text(
+                            'ADD ACCOUNT',
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                          ),
                         )
                       ],
                     ),
@@ -112,17 +120,19 @@ class _AddAccountState extends State<AddAccount> {
                                     children: <Widget>[
                                       DropdownButtonFormField(
                                         value: _categoryVal,
-                                        items: <String>['Social', 'Cloud Storage', 'Cryptocurrency']
-                                            .map((e) => DropdownMenuItem(
-                                          child: Text(e),
-                                          value: e,
-                                        )).toList(),
+                                        items: _categoryList.map((e) =>
+                                            DropdownMenuItem(
+                                              child: Text(e),
+                                              value: e,
+                                            )).toList(),
                                         hint: Text('--Choose Category--'),
                                         onChanged: (newVal) {
                                           setState(() {
                                             _categoryVal = newVal as String?;
                                             if (_categoryVal == 'Social')
                                               _accountsList = _socialList;
+                                            else if (_categoryVal == 'Streaming')
+                                              _accountsList = _streamingList;
                                             else if (_categoryVal == 'Cloud Storage')
                                               _accountsList = _storageList;
                                             else if (_categoryVal == 'Cryptocurrency')
@@ -134,16 +144,18 @@ class _AddAccountState extends State<AddAccount> {
                                       ),
                                       DropdownButtonFormField(
                                         value: _accountVal,
-                                        items: _accountsList.map((e) => DropdownMenuItem(
-                                          child: Text(e),
-                                          value: e,
-                                        )).toList(),
+                                        items: _accountsList.map((e) =>
+                                            DropdownMenuItem(
+                                              child: Text(e),
+                                              value: e,
+                                            )).toList(),
                                         hint: Text('--Choose App--'),
                                         onChanged: (newVal) {
                                           setState(() {
                                             _accountVal = newVal as String?;
                                             if (_accountVal != '--Choose Action--')
-                                              _accessRights = ['Delete account', 'Full Access', 'Partial Access'];
+                                              _accessRights = ['Delete account',
+                                                'Full Access', 'Partial Access'];
                                           });
                                         },
                                       ),

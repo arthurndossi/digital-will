@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dibu/models/app.dart';
 import 'package:dibu/models/beneficiary.dart';
 import 'package:dibu/models/client.dart';
+import 'package:dibu/models/notification.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class DatabaseService {
@@ -55,6 +56,20 @@ class DatabaseService {
     ).toList();
   }
 
+  List<Notification> notificationsFromSnapshot(QuerySnapshot querySnapshot) {
+    return querySnapshot.docs.map((doc) =>
+        Notification.get(
+          name: doc.get('name'),
+          dp: doc.get('dp'),
+          email: doc.get('email'),
+          username: doc.get('username'),
+          bankId: doc.get('bankID'),
+          client: doc.get('client'),
+          phoneNumber: doc.get('msisdn'),
+        )
+    ).toList();
+  }
+
   Future<QuerySnapshot> get myApps {
     return clientCollection.doc(uid).collection('apps').get();
   }
@@ -70,6 +85,10 @@ class DatabaseService {
 
   Future<DocumentSnapshot> get client {
     return clientCollection.doc(uid).get();
+  }
+
+  Future<QuerySnapshot> get notifications {
+    return clientCollection.doc(uid).collection('notifications').get();
   }
 
   Future<void> saveApp(App app) async {
@@ -129,8 +148,8 @@ class DatabaseService {
           email: email,
           password: password
       );
-      User newUser = result.user;
-      await clientCollection.doc(newUser.uid).set({
+      User? newUser = result.user;
+      await clientCollection.doc(newUser?.uid).set({
         'username': username,
         'profileImage': '',
         'email': email,
@@ -145,7 +164,7 @@ class DatabaseService {
       });
       return true;
     } on FirebaseAuthException catch (e) {
-      print(e.code + ": " + e.message);
+      print(e.code + ": " + e.message!);
       return false;
     } catch (e) {
       print(e);

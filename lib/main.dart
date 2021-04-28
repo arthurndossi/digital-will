@@ -3,11 +3,37 @@ import 'package:dibu/home.dart';
 import 'package:dibu/login.dart';
 import 'package:dibu/onboarding.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  print('Handling a background message ${message.messageId}');
+}
+
+const AndroidNotificationChannel channel = AndroidNotificationChannel(
+    'digital_will_channel',
+    'Digital Will Notifications',
+    'Channel for Digital Will Notifications',
+    importance: Importance.high
+);
+
+final FlutterLocalNotificationsPlugin plugin = FlutterLocalNotificationsPlugin();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  await plugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()?.createNotificationChannel(channel);
+
+  await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+    alert: true,
+    badge: true,
+    sound: true
+  );
+
   runApp(MyApp());
 }
 
@@ -26,8 +52,26 @@ class MyApp extends StatelessWidget {
             Commons().getUid(),
           ]),
           builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting)
-              return Center(child: CircularProgressIndicator());
+            double height = MediaQuery.of(context).size.height;
+            double width = MediaQuery.of(context).size.width;
+            if (snapshot.connectionState == ConnectionState.active
+                || snapshot.connectionState == ConnectionState.waiting)
+              return Scaffold(
+                body: Container(
+                  height: height,
+                  width: width,
+                  child: Center(child: CircularProgressIndicator())
+                ),
+              );
+            else if (snapshot.connectionState == ConnectionState.done &&
+                (snapshot.hasError || !snapshot.hasData))
+              return Scaffold(
+                body: Container(
+                  height: height,
+                  width: width,
+                  child: Center(child: Text(snapshot.error as String))
+                ),
+              );
             else if (snapshot.hasData) {
               List<String> list = snapshot.data as List<String>;
               if (list[0] == "logged_out")

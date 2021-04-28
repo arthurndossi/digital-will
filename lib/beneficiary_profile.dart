@@ -145,7 +145,8 @@ class _BeneficiaryProfileState extends State<BeneficiaryProfile> {
                       Padding(
                         padding: const EdgeInsets.fromLTRB(8.0, 16.0, 0, 8.0),
                         child: Text(
-                          'ACCOUNTS(${widget.beneficiary.apps!.length})',
+                          // 'ACCOUNTS(${widget.beneficiary.apps!.length})',
+                          'ACCOUNTS(${accounts.length})',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,

@@ -7,46 +7,57 @@ class DefaultBar with ChangeNotifier {
   String _currentBar = 'AppBar';
   bool _showSelect = false;
   int _counter = 0;
-  final List<int> _selected = [];
+  final List<Map<String, int>> _selected = [];
 
   void setCurrentBar(String currentBar) {
     currentBar == 'AppBar' ? _currentBar = 'AppBar': _currentBar = 'SelectBar';
-    notifyListeners();
+    // notifyListeners();
   }
 
   String get getCurrentBar => _currentBar;
 
   void increment() {
     _counter += 1;
-    notifyListeners();
+    // notifyListeners();
   }
 
   void decrement() {
     _counter -= 1;
-    notifyListeners();
+    // notifyListeners();
   }
 
   String get getCounter => _counter.toString();
 
   void toggleShowSelect() {
     _showSelect = !_showSelect;
-    notifyListeners();
+    // notifyListeners();
   }
 
   bool get showSelect => _showSelect;
 
-  void addToSelected(int index) {
-    _selected.add(index);
+  void addToSelected(int row, int pos) {
+    var keyPair = {
+      'Key': row,
+      'value': pos,
+    };
+    _selected.add(keyPair);
     increment();
+    update();
   }
 
-  void removeFromSelected(int index) {
-    int position = _selected.indexOf(index);
-    _selected.removeAt(position);
+  void removeFromSelected(int row, int pos) {
+    var index = _selected.indexWhere((pair) =>
+    pair['Key'] == row && pair['value'] == pos);
+    _selected.removeAt(index);
     if (_selected.isEmpty) {
-      _counter = 0;
-      notifyListeners();
-    } else decrement();
+      clearSelected();
+      setCurrentBar('AppBar');
+      update();
+      // notifyListeners();
+    } else {
+      decrement();
+      update();
+    }
   }
 
   void clearSelected() {
@@ -55,5 +66,20 @@ class DefaultBar with ChangeNotifier {
     toggleShowSelect();
   }
 
-  List<int> get getSelected => _selected;
+  bool isItemSelected(int row, int pos) {
+    for (var map in _selected) {
+      if (map.containsKey('Key')) {
+        if (map['Key'] == row && map['value'] == pos) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  void update() {
+    notifyListeners();
+  }
+
+  List<Map<String, int>> get getSelected => _selected;
 }

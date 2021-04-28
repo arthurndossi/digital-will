@@ -22,10 +22,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
-  // int _lastIndex = 0;
-  int _overlay = -1;
-
-  late List<App> _apps;
+  int _row = -1;
+  int _pos = -1;
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +52,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               case 'Likee':
               case 'Snapchat':
               case 'WhatsApp':
-              case 'Telegram':
+              case 'Skype':
                 var obj = App.installed(application.appName, icon, 'Social');
                 _elements.add(obj);
                 break;
@@ -67,7 +65,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               case 'Bitcoin':
               case 'Ethereum':
               case 'Coinbase':
-                var obj = App.installed(application.appName, icon, 'Crypto Wallet');
+                var obj = App.installed(
+                    application.appName, icon, 'Crypto Wallet');
+                _elements.add(obj);
+                break;
+              case 'Netflix':
+              case 'Prime Video':
+              case 'Spotify':
+                var obj = App.installed(application.appName, icon, 'Streaming');
                 _elements.add(obj);
                 break;
             }
@@ -84,6 +89,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               case 'Likee':
               case 'Snapchat':
               case 'WhatsApp':
+              case 'Skype':
                 app.category = "Social";
                 _elements.add(app);
                 break;
@@ -99,248 +105,536 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 app.category = "Crypto Wallet";
                 _elements.add(app);
                 break;
+              case 'Netflix':
+              case 'Prime Video':
+              case 'Spotify':
+                app.category = "Streaming";
+                _elements.add(app);
+                break;
             }
           }
           var _newMap = groupBy(
-            _elements, (App obj) => obj.category
+              _elements, (App obj) => obj.category
           );
-          var isPortrait = MediaQuery.of(context).orientation == Orientation.portrait;
+          var isPortrait = MediaQuery
+              .of(context)
+              .orientation == Orientation.portrait;
           return GestureDetector(
-            onTap: () {
+            onTap: () => {
               setState(() {
-                _overlay = -1;
-              });
+                _row = -1;
+                _pos = -1;
+              })
             },
-            child: Container(
-              child: Column(
-                children: _newMap.entries.map<Widget>((val) {
-                  // if (_apps == null)
-                  _apps = val.value;
-                  return Column(
+            child: SingleChildScrollView(
+                child: Column(
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          val.key.toString(),
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: GridView.builder(
-                              shrinkWrap: true,
-                              itemCount: _apps.length,
-                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: isPortrait ? 3 : 5,
-                                mainAxisSpacing: 10,
-                                crossAxisSpacing: 5,
-                                childAspectRatio: isPortrait ? 1 : 1.1
+                      for (int i = 0; i < _newMap.entries.length; i++)
+                        Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                _newMap.entries.elementAt(i).key.toString(),
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    fontSize: 20, fontWeight: FontWeight.bold),
                               ),
-                              itemBuilder: (context, index) {
-                                var defaultBar = context.read<DefaultBar>();
-                                bool showSelect = defaultBar.showSelect;
-                                bool isSelected = defaultBar.getSelected.contains(index);
-                                return Stack(
-                                  clipBehavior: Clip.none,
-                                  children: [
-                                    IgnorePointer(
-                                      child: Container(
-                                        color: Colors.transparent,
-                                        height: 150.0,
-                                        width: 150.0,
+                            ),
+                            Row(
+                                children: [
+                                  Expanded(
+                                    child: GridView.builder(
+                                      shrinkWrap: true,
+                                      itemCount: _newMap.entries.elementAt(i).value.length,
+                                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount: isPortrait ? 3 : 5,
+                                          mainAxisSpacing: 10,
+                                          crossAxisSpacing: 5,
+                                          childAspectRatio: isPortrait ? 1 : 1.1
                                       ),
-                                    ),
-                                    Card(
-                                      elevation: 8.0,
-                                      child: InkWell(
-                                        onTap: () {
-                                          if (_apps[index].hasCredentials) {
-                                            NavKey.innerNavKey.currentState!.push(
-                                              MaterialPageRoute(
-                                                builder: (context) => AppAccount(
-                                                  app: _apps[index]
-                                                )
-                                              )
-                                            );
-                                          } else {
-                                            NavKey.innerNavKey.currentState!.push(
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                  AddAccount(
-                                                    appName: _apps[index].name,
-                                                    category: _apps[index].category,
-                                                    isInstalled: _apps[index].isInstalled,
-                                                    uid: widget.uid,
-                                                  )
-                                              )
-                                            );
-                                          }
-                                        },
-                                        onLongPress: () {
-                                          if (defaultBar.getCurrentBar == 'AppBar') {
-                                            defaultBar.setCurrentBar('SelectBar');
-                                            defaultBar.toggleShowSelect();
-                                            defaultBar.addToSelected(index);
-                                          }
-                                        },
-                                        child: Stack(
+                                      itemBuilder: (context, index) {
+                                        var defaultBar = context.read<DefaultBar>();
+                                        bool showSelect = defaultBar.showSelect;
+                                        bool isSelected = defaultBar.isItemSelected(i, index);
+                                        return Stack(
+                                          clipBehavior: Clip.none,
                                           children: [
-                                            Container(
-                                              width: 100,
-                                              height: 100,
-                                              child: Column(
-                                                mainAxisAlignment: MainAxisAlignment.center,
-                                                children: [
-                                                  Padding(
-                                                    padding: const EdgeInsets.all(4.0),
-                                                    child: _apps[index].avatar == null
-                                                        ? CircleAvatar(radius: 30.0,
-                                                        backgroundColor: Colors.transparent,
-                                                        child: Image.asset(
-                                                          _apps[index].icon!,
-                                                          width: 60.0,
-                                                          height: 60.0
+                                            IgnorePointer(
+                                              child: Container(
+                                                color: Colors.transparent,
+                                                height: 150.0,
+                                                width: 150.0,
+                                              ),
+                                            ),
+                                            Card(
+                                                elevation: 8.0,
+                                                child: InkWell(
+                                                    onTap: () {
+                                                      if (defaultBar.getCurrentBar == 'SelectBar') {
+                                                        defaultBar
+                                                            .setCurrentBar(
+                                                            'AppBar');
+                                                        defaultBar.clearSelected();
+                                                        defaultBar.update();
+                                                      }
+                                                      if (_newMap.entries.elementAt(i).value[index]
+                                                          .hasCredentials) {
+                                                        NavKey.innerNavKey
+                                                            .currentState!.push(
+                                                            MaterialPageRoute(
+                                                                builder: (context) =>
+                                                                    AppAccount(
+                                                                        app: _newMap.entries.elementAt(i).value[index]
+                                                                    )
+                                                            )
+                                                        );
+                                                      } else {
+                                                        NavKey.innerNavKey
+                                                            .currentState!.push(
+                                                            MaterialPageRoute(
+                                                                builder: (context) =>
+                                                                    AddAccount(
+                                                                      appName: _newMap.entries.elementAt(i).value[index]
+                                                                          .name,
+                                                                      category: _newMap.entries.elementAt(i).value[index]
+                                                                          .category,
+                                                                      isInstalled: _newMap.entries.elementAt(i).value[index]
+                                                                          .isInstalled,
+                                                                      uid: widget.uid,
+                                                                    )
+                                                            )
+                                                        );
+                                                      }
+                                                    },
+                                                    onLongPress: () {
+                                                      if (defaultBar.getCurrentBar ==
+                                                          'AppBar') {
+                                                        defaultBar.setCurrentBar(
+                                                            'SelectBar');
+                                                        defaultBar.toggleShowSelect();
+                                                        defaultBar.addToSelected(
+                                                            i, index);
+                                                        defaultBar.update();
+                                                      }
+                                                    },
+                                                    child: Stack(
+                                                        children: [
+                                                          Container(
+                                                              width: 100,
+                                                              height: 100,
+                                                              child: Column(
+                                                                  mainAxisAlignment: MainAxisAlignment
+                                                                      .center,
+                                                                  children: [
+                                                                    Padding(
+                                                                      padding: const EdgeInsets
+                                                                          .all(4.0),
+                                                                      child: _newMap.entries.elementAt(i).value[index]
+                                                                          .avatar ==
+                                                                          null
+                                                                          ? CircleAvatar(
+                                                                          radius: 30.0,
+                                                                          backgroundColor: Colors
+                                                                              .transparent,
+                                                                          child: Image
+                                                                              .asset(
+                                                                              _newMap.entries.elementAt(i).value[index]
+                                                                                  .icon!,
+                                                                              width: 60.0,
+                                                                              height: 60.0
+                                                                          )
+                                                                      )
+                                                                          : _newMap.entries.elementAt(i).value[index]
+                                                                          .avatar,
+                                                                    ),
+                                                                    Text(_newMap.entries.elementAt(i).value[index]
+                                                                        .name!),
+                                                                  ]
+                                                              )
+                                                          ),
+                                                          Positioned(
+                                                            top: 0,
+                                                            right: 0,
+                                                            child: Padding(
+                                                              padding: const EdgeInsets
+                                                                  .all(4.0),
+                                                              child: CircularButton(
+                                                                color: Color(
+                                                                    0xFF62D1EA),
+                                                                width: 30,
+                                                                height: 30,
+                                                                icon: Icon(
+                                                                  Icons.more_vert,
+                                                                  size: 16,
+                                                                  color: Colors.white,
+                                                                ),
+                                                                onClick: () {
+                                                                  setState(() {
+                                                                    if (_row == i && _pos == index) {
+                                                                      _row = -1;
+                                                                      _pos = -1;
+                                                                    } else {
+                                                                      _row = i;
+                                                                      _pos = index;
+                                                                    }
+                                                                  });
+                                                                },
+                                                              ),
+                                                            ),
+                                                          )
+                                                        ]
+                                                    )
+                                                )
+                                            ),
+                                            Visibility(
+                                              visible: showSelect,
+                                              child: Positioned(
+                                                child: Container(
+                                                  width: 24,
+                                                  height: 24,
+                                                  decoration: isSelected ?
+                                                  BoxDecoration(
+                                                      color: Color(0xFF62D1EA),
+                                                      shape: BoxShape.circle
+                                                  ) :
+                                                  BoxDecoration(
+                                                    border: Border.all(
+                                                        color: Color(0xFF62D1EA),
+                                                        width: 2.0),
+                                                    color: Colors.transparent,
+                                                    borderRadius: BorderRadius
+                                                        .circular(12),
+                                                  ),
+                                                  child: showSelect ? InkWell(
+                                                    onTap: () => {
+                                                      isSelected ?
+                                                      defaultBar.removeFromSelected(i, index)
+                                                          : defaultBar.addToSelected(i, index)
+                                                    },
+                                                    child: isSelected ? Icon(
+                                                      Icons.check_sharp,
+                                                      color: Colors.white,
+                                                      size: 20,
+                                                    ) : null,
+                                                  ) : null,
+                                                ),
+                                              ),
+                                            ),
+                                            Visibility(
+                                              visible: _row == i && _pos == index,
+                                              child: Positioned(
+                                                top: 5,
+                                                right: 0,
+                                                child: Card(
+                                                    elevation: 10.0,
+                                                    child: Container(
+                                                        width: 30,
+                                                        height: 100,
+                                                        child: Scrollbar(
+                                                          child: SingleChildScrollView(
+                                                            child: Column(
+                                                              mainAxisAlignment: MainAxisAlignment
+                                                                  .center,
+                                                              children: [
+                                                                SizedBox(
+                                                                  height: 32.0,
+                                                                  width: 32.0,
+                                                                  child: IconButton(
+                                                                    icon: Icon(
+                                                                      Icons.launch,
+                                                                      color: Color(
+                                                                          0xFF62D1EA),
+                                                                    ),
+                                                                    padding: EdgeInsets
+                                                                        .zero,
+                                                                    onPressed: () {
+                                                                      DeviceApps
+                                                                          .openApp(
+                                                                          apps[index]
+                                                                              .packageName);
+                                                                    },
+                                                                  ),
+                                                                ),
+                                                                SizedBox(
+                                                                  height: 32.0,
+                                                                  width: 32.0,
+                                                                  child: IconButton(
+                                                                    icon: Icon(
+                                                                      Icons
+                                                                          .edit_outlined,
+                                                                      color: Color(
+                                                                          0xFF62D1EA),
+                                                                    ),
+                                                                    padding: EdgeInsets
+                                                                        .zero,
+                                                                    onPressed: () {},
+                                                                  ),
+                                                                ),
+                                                                SizedBox(
+                                                                  height: 32.0,
+                                                                  width: 32.0,
+                                                                  child: IconButton(
+                                                                    icon: Icon(
+                                                                      Icons.delete,
+                                                                      color: Color(
+                                                                          0xFF62D1EA),
+                                                                    ),
+                                                                    padding: EdgeInsets
+                                                                        .zero,
+                                                                    onPressed: () {},
+                                                                  ),
+                                                                )
+                                                              ],
+                                                            ),
+                                                          ),
                                                         )
                                                     )
-                                                        : _apps[index].avatar,
-                                                  ),
-                                                  Text(_apps[index].name!),
-                                                ]
-                                              )
-                                            ),
-                                            Positioned(
-                                              top: 0,
-                                              right: 0,
-                                              child: Padding(
-                                                padding: const EdgeInsets.all(4.0),
-                                                child: CircularButton(
-                                                  color: Color(0xFF62D1EA),
-                                                  width: 30,
-                                                  height: 30,
-                                                  icon: Icon(
-                                                    Icons.more_vert,
-                                                    size: 16,
-                                                    color: Colors.white,
-                                                  ),
-                                                  onClick: () {
-                                                    setState(() {
-                                                      if (_overlay == index)
-                                                        _overlay = -1;
-                                                      else
-                                                        _overlay = index;
-                                                    });
-                                                  },
                                                 ),
                                               ),
                                             )
-                                          ]
-                                        )
-                                      )
+                                          ],
+                                        );
+                                      },
                                     ),
-                                    Visibility(
-                                      visible: showSelect,
-                                      child: Positioned(
-                                        child: Container(
-                                          width: 24,
-                                          height: 24,
-                                          decoration: BoxDecoration(
-                                            border: Border.all(color: Color(0xFF62D1EA), width: 2.0),
-                                            color: Colors.transparent,
-                                            borderRadius: BorderRadius.circular(12),
-                                          ),
-                                          child: showSelect ? InkWell(
-                                            onTap: () => {
-                                              isSelected ?
-                                              defaultBar.removeFromSelected(index)
-                                                : defaultBar.addToSelected(index)
-                                            },
-                                            child: isSelected ? Icon(
-                                              Icons.check_sharp,
-                                              color: Color(0xFF62D1EA),
-                                              size: 20,
-                                            ) : null,
-                                          ) : null,
-                                        ),
-                                      ),
-                                    ),
-                                    Visibility(
-                                      visible: _overlay == index,
-                                      child: Positioned(
-                                        top: 5,
-                                        right: 0,
-                                        child: Card(
-                                          elevation: 10.0,
-                                          child: Container(
-                                            width: 30,
-                                            height: 100,
-                                            child: Scrollbar(
-                                              child: SingleChildScrollView(
-                                                child: Column(
-                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                  children: [
-                                                    SizedBox(
-                                                      height: 32.0,
-                                                      width: 32.0,
-                                                      child: IconButton(
-                                                        icon: Icon(
-                                                          Icons.launch,
-                                                          color: Color(0xFF62D1EA),
-                                                        ),
-                                                        padding: EdgeInsets.zero,
-                                                        onPressed: () {
-                                                          DeviceApps.openApp(apps[index].packageName);
-                                                        },
-                                                      ),
-                                                    ),
-                                                    SizedBox(
-                                                      height: 32.0,
-                                                      width: 32.0,
-                                                      child: IconButton(
-                                                        icon: Icon(
-                                                          Icons.edit_outlined,
-                                                          color: Color(0xFF62D1EA),
-                                                        ),
-                                                        padding: EdgeInsets.zero,
-                                                        onPressed: () {},
-                                                      ),
-                                                    ),
-                                                    SizedBox(
-                                                      height: 32.0,
-                                                      width: 32.0,
-                                                      child: IconButton(
-                                                        icon: Icon(
-                                                          Icons.delete,
-                                                          color: Color(0xFF62D1EA),
-                                                        ),
-                                                        padding: EdgeInsets.zero,
-                                                        onPressed: () {},
-                                                      ),
-                                                    )
-                                                  ],
-                                                ),
-                                              ),
-                                            )
-                                          )
-                                        ),
-                                      ),
-                                    )
-                                  ],
-                                );
-                              },
-                            ),
-                          )
-                        ],
-                      )
-                    ],
-                  );
-                }).toList(),
-              ),
+                                  ),
+                                ]
+                            )
+                          ],
+                        ),
+                    ]
+                )
             ),
+            // child: Column(
+            //   children: _newMap.entries.map<Widget>((val) {
+            //     _apps = val.value;
+            //     return Column(
+            //       children: [
+            //         Padding(
+            //           padding: const EdgeInsets.all(8.0),
+            //           child: Text(
+            //             val.key.toString(),
+            //             textAlign: TextAlign.center,
+            //             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            //           ),
+            //         ),
+            //         Row(
+            //           children: [
+            //             Expanded(
+            //                 child: GridView(
+            //                   shrinkWrap: true,
+            //                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            //                     crossAxisCount: isPortrait ? 3 : 5,
+            //                     mainAxisSpacing: 10,
+            //                     crossAxisSpacing: 5,
+            //                     childAspectRatio: isPortrait ? 1 : 1.1
+            //                   ),
+            //                   children: [
+            //                     for (int i = 0; i < _apps.length; i++)
+            //                       Stack(
+            //                       clipBehavior: Clip.none,
+            //                       children: [
+            //                         IgnorePointer(
+            //                           child: Container(
+            //                             color: Colors.transparent,
+            //                             height: 150.0,
+            //                             width: 150.0,
+            //                           ),
+            //                         ),
+            //                         Card(
+            //                           elevation: 8.0,
+            //                           child: InkWell(
+            //                             onTap: () {
+            //                               if (_apps[i].hasCredentials) {
+            //                                 NavKey.innerNavKey.currentState!.push(
+            //                                   MaterialPageRoute(
+            //                                     builder: (context) => AppAccount(
+            //                                       app: _apps[i]
+            //                                     )
+            //                                   )
+            //                                 );
+            //                               } else {
+            //                                 NavKey.innerNavKey.currentState!.push(
+            //                                   MaterialPageRoute(
+            //                                     builder: (context) =>
+            //                                       AddAccount(
+            //                                         appName: _apps[i].name,
+            //                                         category: _apps[i].category,
+            //                                         isInstalled: _apps[i].isInstalled,
+            //                                         uid: widget.uid,
+            //                                       )
+            //                                   )
+            //                                 );
+            //                               }
+            //                             },
+            //                             onLongPress: () {
+            //                               var defaultBar = context.read<DefaultBar>();
+            //                               if (defaultBar.getCurrentBar == 'AppBar') {
+            //                                 defaultBar.setCurrentBar('SelectBar');
+            //                                 defaultBar.toggleShowSelect();
+            //                                 defaultBar.addToSelected(i);
+            //                               }
+            //                             },
+            //                             child: Stack(
+            //                               children: [
+            //                                 Container(
+            //                                   width: 100,
+            //                                   height: 100,
+            //                                   child: Column(
+            //                                     mainAxisAlignment: MainAxisAlignment.center,
+            //                                     children: [
+            //                                       Padding(
+            //                                         padding: const EdgeInsets.all(4.0),
+            //                                         child: _apps[i].avatar == null
+            //                                             ? CircleAvatar(radius: 30.0,
+            //                                             backgroundColor: Colors.transparent,
+            //                                             child: Image.asset(
+            //                                               _apps[i].icon!,
+            //                                               width: 60.0,
+            //                                               height: 60.0
+            //                                             )
+            //                                         )
+            //                                             : _apps[i].avatar,
+            //                                       ),
+            //                                       Text(_apps[i].name!),
+            //                                     ]
+            //                                   )
+            //                                 ),
+            //                                 Positioned(
+            //                                   top: 0,
+            //                                   right: 0,
+            //                                   child: Padding(
+            //                                     padding: const EdgeInsets.all(4.0),
+            //                                     child: CircularButton(
+            //                                       color: Color(0xFF62D1EA),
+            //                                       width: 30,
+            //                                       height: 30,
+            //                                       icon: Icon(
+            //                                         Icons.more_vert,
+            //                                         size: 16,
+            //                                         color: Colors.white,
+            //                                       ),
+            //                                       onClick: () {
+            //                                         setState(() {
+            //                                           if (_overlay == i)
+            //                                             _overlay = -1;
+            //                                           else
+            //                                             _overlay = i;
+            //                                         });
+            //                                       },
+            //                                     ),
+            //                                   ),
+            //                                 )
+            //                               ]
+            //                             )
+            //                           )
+            //                         ),
+            //                         Visibility(
+            //                           visible: context.read<DefaultBar>().showSelect,
+            //                           child: Positioned(
+            //                             child: Container(
+            //                               width: 24,
+            //                               height: 24,
+            //                               decoration: BoxDecoration(
+            //                                 border: Border.all(color: Color(0xFF62D1EA), width: 2.0),
+            //                                 color: Colors.transparent,
+            //                                 borderRadius: BorderRadius.circular(12),
+            //                               ),
+            //                               child: context.read<DefaultBar>().showSelect ? InkWell(
+            //                                 onTap: () => {
+            //                                   context.read<DefaultBar>()
+            //                                       .getSelected.contains(i) ?
+            //                                   context.read<DefaultBar>()
+            //                                       .removeFromSelected(i) :
+            //                                   context.read<DefaultBar>()
+            //                                       .addToSelected(i)
+            //                                 },
+            //                                 child: context.read<DefaultBar>()
+            //                                     .getSelected.contains(i) ?
+            //                                 Icon(
+            //                                   Icons.check_sharp,
+            //                                   color: Color(0xFF62D1EA),
+            //                                   size: 20,
+            //                                 ) : null,
+            //                               ) : null,
+            //                             ),
+            //                           ),
+            //                         ),
+            //                         Visibility(
+            //                           visible: _overlay == i,
+            //                           child: Positioned(
+            //                             top: 5,
+            //                             right: 0,
+            //                             child: Card(
+            //                               elevation: 10.0,
+            //                               child: Container(
+            //                                 width: 30,
+            //                                 height: 100,
+            //                                 child: Scrollbar(
+            //                                   child: SingleChildScrollView(
+            //                                     child: Column(
+            //                                       mainAxisAlignment: MainAxisAlignment.center,
+            //                                       children: [
+            //                                         SizedBox(
+            //                                           height: 32.0,
+            //                                           width: 32.0,
+            //                                           child: IconButton(
+            //                                             icon: Icon(
+            //                                               Icons.launch,
+            //                                               color: Color(0xFF62D1EA),
+            //                                             ),
+            //                                             padding: EdgeInsets.zero,
+            //                                             onPressed: () {
+            //                                               DeviceApps.openApp(apps[i].packageName);
+            //                                             },
+            //                                           ),
+            //                                         ),
+            //                                         SizedBox(
+            //                                           height: 32.0,
+            //                                           width: 32.0,
+            //                                           child: IconButton(
+            //                                             icon: Icon(
+            //                                               Icons.edit_outlined,
+            //                                               color: Color(0xFF62D1EA),
+            //                                             ),
+            //                                             padding: EdgeInsets.zero,
+            //                                             onPressed: () {},
+            //                                           ),
+            //                                         ),
+            //                                         SizedBox(
+            //                                           height: 32.0,
+            //                                           width: 32.0,
+            //                                           child: IconButton(
+            //                                             icon: Icon(
+            //                                               Icons.delete,
+            //                                               color: Color(0xFF62D1EA),
+            //                                             ),
+            //                                             padding: EdgeInsets.zero,
+            //                                             onPressed: () {},
+            //                                           ),
+            //                                         )
+            //                                       ],
+            //                                     ),
+            //                                   ),
+            //                                 )
+            //                               )
+            //                             ),
+            //                           ),
+            //                         )
+            //                       ],
+            //                     )
+            //                   ],
+            //                 )
+            //             )
+            //           ],
+            //         )
+            //       ],
+            //     );
+            //   }).toList(),
+            // ),
           );
         }
-      },
+        }
     );
   }
 

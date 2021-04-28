@@ -135,8 +135,8 @@ class _LoginState extends State<Login> {
                                             try {
                                               final result = await DatabaseService()
                                                   .login(_username.text, _password.text);
-                                              User user = result.user;
-                                              Commons().saveLoginStatus(user);
+                                              User? user = result.user;
+                                              Commons().saveLoginStatus(user!);
                                               Navigator.of(context)
                                                   .pushReplacement(
                                                   MaterialPageRoute(
@@ -152,7 +152,7 @@ class _LoginState extends State<Login> {
                                                       AlertDialog(
                                                         title: Text("Error!"),
                                                         content: Text(
-                                                            (e as FirebaseAuthException).message),
+                                                            (e as FirebaseAuthException).message!),
                                                         backgroundColor: Colors
                                                             .white,
                                                         shape: RoundedRectangleBorder(
@@ -160,11 +160,14 @@ class _LoginState extends State<Login> {
                                                                 .circular(
                                                                 15)),
                                                         actions: <Widget>[
-                                                          FlatButton(
+                                                          TextButton(
                                                             child: Text(
-                                                                "Ok"),
-                                                            textColor: Colors
-                                                                .black,
+                                                              "Ok",
+                                                              style: TextStyle(
+                                                                color: Colors
+                                                                    .black,
+                                                              ),
+                                                            ),
                                                             onPressed: () {
                                                               Navigator.of(
                                                                   context)

@@ -6,7 +6,7 @@ import 'login.dart';
 
 class Commons {
 
-  Future<String> getUid() async {
+  Future<String?> getUid() async {
     final storage = FlutterSecureStorage();
     return await storage.read(key: "uid");
   }
@@ -18,9 +18,9 @@ class Commons {
     await storage.write(key: "login_status", value: "logged_in");
   }
 
-  Future<String> checkLoginStatus() async {
+  Future<String?> checkLoginStatus() async {
     final storage = FlutterSecureStorage();
-    String loginStatus = await storage.read(key: "login_status");
+    String? loginStatus = await storage.read(key: "login_status");
     return loginStatus;
   }
 
